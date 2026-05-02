@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Мой сайт</title>
+  <title>Пригласительное</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,23 +12,48 @@
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      background: #000;
+      min-height: 100%;
+      background: #111;
     }
 
     body {
       overflow-x: hidden;
+      font-family: Arial, sans-serif;
     }
 
-    .page-image {
+    .page {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .site-frame {
+      width: 100%;
+      max-width: 760px;
+      background: #000;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .site-image {
       display: block;
       width: 100%;
       height: auto;
-      max-width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .site-frame {
+        max-width: 100%;
+        box-shadow: none;
+      }
     }
   </style>
 </head>
 <body>
-  <img src="./photo.jpg" alt="Длинное изображение сайта" class="page-image" />
+  <main class="page">
+    <div class="site-frame">
+      <img src="./photo.jpg" alt="Длинное изображение сайта" class="site-image">
+    </div>
+  </main>
 </body>
 </html>
