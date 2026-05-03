@@ -34,7 +34,8 @@
     .slide img {
       width: 100vw;
       height: 100vh;
-      object-fit: contain;
+      object-fit: cover;
+      object-position: center center;
       display: block;
     }
   </style>
@@ -60,13 +61,19 @@
       locked = true;
       current = index;
       slides[current].scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => locked = false, 900);
+      setTimeout(() => {
+        locked = false;
+      }, 900);
     }
 
     window.addEventListener('wheel', (e) => {
       if (locked) return;
-      if (e.deltaY > 30) goToSlide(current + 1);
-      if (e.deltaY < -30) goToSlide(current - 1);
+
+      if (e.deltaY > 30) {
+        goToSlide(current + 1);
+      } else if (e.deltaY < -30) {
+        goToSlide(current - 1);
+      }
     }, { passive: true });
 
     window.addEventListener('keydown', (e) => {
@@ -89,11 +96,15 @@
 
     window.addEventListener('touchend', (e) => {
       if (locked) return;
+
       const touchEndY = e.changedTouches[0].clientY;
       const diff = touchStartY - touchEndY;
 
-      if (diff > 50) goToSlide(current + 1);
-      if (diff < -50) goToSlide(current - 1);
+      if (diff > 50) {
+        goToSlide(current + 1);
+      } else if (diff < -50) {
+        goToSlide(current - 1);
+      }
     }, { passive: true });
   </script>
 </body>
