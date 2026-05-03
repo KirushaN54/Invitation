@@ -214,9 +214,9 @@
       transform: translateX(-50%);
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       min-height: 52px;
-      padding: 14px 18px;
+      padding: 12px 18px;
       border-radius: 999px;
       text-decoration: none;
       color: #2f3818;
@@ -237,8 +237,8 @@
     }
 
     .map-icon {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 999px;
       display: grid;
       place-items: center;
@@ -252,6 +252,7 @@
       display: flex;
       flex-direction: column;
       line-height: 1.05;
+      white-space: nowrap;
     }
 
     .map-text strong {
@@ -266,7 +267,7 @@
       margin-top: 3px;
     }
 
-    /* Мобильная рамка-карточка */
+    /* Мобильная рамка-карточка и уменьшенная плашка */
 
     @media (max-width: 768px) {
       .slide {
@@ -292,10 +293,23 @@
       }
 
       .map-link {
-        bottom: calc(22px + env(safe-area-inset-bottom));
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 12px 14px;
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        padding: 9px 12px;
+        min-height: 44px;
+        gap: 6px;
+      }
+
+      .map-icon {
+        width: 26px;
+        height: 26px;
+      }
+
+      .map-text strong {
+        font-size: 12px;
+      }
+
+      .map-text span {
+        font-size: 10px;
       }
 
       .counter { font-size: 12px; }
@@ -382,8 +396,8 @@
             </svg>
           </span>
           <span class="map-text">
-            <strong>Открыть маршрут</strong>
-            <span>в Яндекс Картах</span>
+            <strong>Открыть в Яндекс Картах</strong>
+            <span>Маршрут до площадки</span>
           </span>
         </a>
       </div>
@@ -393,10 +407,6 @@
     </section>
     <section class="slide next" data-index="4">
       <div class="frame"><img src="./photo5.jpeg" alt="Слайд 5 приглашения" /></div>
-    </section>
-    <section class="slide next" data-index="5">
-      <div class="frame"><img src="./photo6.jpeg" alt="Слайд 6 приглашения" /></div>
-    </section>
     </section>
     <section class="slide next" data-index="5">
       <div class="frame"><img src="./photo6.jpeg" alt="Слайд 6 приглашения" /></div>
@@ -536,7 +546,7 @@
         '#ffd0f0', '#ffe1ff'
       ];
 
-      const count = 90; // больше частиц
+      const count = 90;
       for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.3 - 0.15);
         const speed = 1.6 + Math.random() * 1.9;
@@ -559,7 +569,7 @@
       fwParticles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.03; // немного гравитации
+        p.vy += 0.03;
         p.life++;
 
         const fade = p.life / p.maxLife;
@@ -589,14 +599,12 @@
 
       resizeFireworks();
 
-      // серия залпов с небольшим смещением по горизонтали
       createFireworkBurst(-60);
       setTimeout(() => createFireworkBurst(40), 350);
       setTimeout(() => createFireworkBurst(0), 700);
       setTimeout(() => createFireworkBurst(-30), 1050);
       setTimeout(() => createFireworkBurst(70), 1400);
 
-      // остановить через ~4 секунды после начала серии
       setTimeout(() => { fwActive = false; }, 4200);
 
       requestAnimationFrame(stepFireworks);
@@ -606,9 +614,7 @@
       if (!fwCanvas || fwStartedOnce) return;
       fwStartedOnce = true;
 
-      // задержка ~1.2 секунды после появления первого слайда
       setTimeout(() => {
-        // вдруг пользователь уже ушёл со слайда 1
         if (current === 0) {
           runFireworksSequence();
         }
