@@ -344,12 +344,25 @@
         animation: none !important;
       }
     }
+
+    /* Canvas фейерверка на первом слайде */
+
+    .fireworks-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      mix-blend-mode: screen;
+    }
   </style>
 </head>
 <body>
   <div class="deck" id="deck">
     <section class="slide active" data-index="0">
-      <div class="frame"><img src="./photo1.jpeg" alt="Слайд 1 приглашения" /></div>
+      <div class="frame">
+        <img src="./photo1.jpeg" alt="Слайд 1 приглашения" />
+        <canvas class="fireworks-layer" id="fireworksCanvas"></canvas>
+      </div>
     </section>
     <section class="slide next" data-index="1">
       <div class="frame"><img src="./photo2.jpeg" alt="Слайд 2 приглашения" /></div>
@@ -361,11 +374,11 @@
            href="https://yandex.ru/maps/-/CPWAyO1~"
            target="_blank"
            rel="noopener noreferrer"
-           aria-label="Открыть в Яндекс Картах">
+           aria-label="Открыть маршрут в Яндекс Картах">
           <span class="map-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z" fill="currentColor"/>
-              ircle cx="12" cy="10" r="2.6" fill="#7a8941"/>
+              <circle cx="12" cy="10" r="2.6" fill="#7a8941"/>
             </svg>
           </span>
           <span class="map-text">
@@ -428,6 +441,7 @@
 
       if (current === 0) {
         hint.style.opacity = '1';
+        startFireworks();
       } else {
         hint.style.opacity = '0';
       }
@@ -491,6 +505,83 @@
     dots.forEach((dot, index) => {
       dot.addEventListener('click', () => goToSlide(index));
     });
+
+    /* Простая анимация фейерверков на первом слайде */
+
+    const fwCanvas = document.getElementById('fireworksCanvas');
+    const fwCtx = fwCanvas.getContext('2d');
+    let fwParticles = [];
+    let fwActive = false;
+    let fwStartedOnce = false;
+
+    function resizeFireworks() {
+      if (!fwCanvas) return;
+      const rect = fwCanvas.getBoundingClientRect();
+      fwCanvas.width = rect.width * window.devicePixelRatio;
+      fwCanvas.height = rect.height * window.devicePixelRatio;
+      fwCtx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    }
+
+    function createFireworkBurst() {
+      const rect = fwCanvas.getBoundingClientRect();
+      const cx = rect.width / 2 + (Math.random() * 80 - 40);
+      const cy = rect.height / 3 + (Math.random() * 60 - 30);
+      const colors = ['#f5f0dd', '#ffe7a3', '#f7d188', '#ffffff', '#ffcfb3'];
+
+      const count = 40;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+        const speed = 1.3 + Math.random() * 1.4;
+        fwParticles.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 0,
+          maxLife: 40 + Math.random() * 18,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+    }
+
+    function stepFireworks() {
+      if (!fwActive) return;
+      fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+
+      fwParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.02;
+        p.life++;
+
+        const alpha = Math.max(0, 1 - p.life / p.maxLife);
+        fwCtx.globalAlpha = alpha;
+        fwCtx.beginPath();
+        fwCtx.arc(p.x, p.y, 2.1, 0, Math.PI * 2);
+        fwCtx.fillStyle = p.color;
+        fwCtx.fill();
+      });
+
+      fwParticles = fwParticles.filter(p => p.life < p.maxLife);
+      fwCtx.globalAlpha = 1;
+
+      requestAnimationFrame(stepFireworks);
+    }
+
+    function startFireworks() {
+      if (!fwCanvas || fwStartedOnce) return;
+      fwStartedOnce = true;
+      fwActive = true;
+      resizeFireworks();
+      createFireworkBurst();
+      setTimeout(createFireworkBurst, 600);
+      setTimeout(createFireworkBurst, 1200);
+      setTimeout(() => { fwActive = false; }, 2600);
+      requestAnimationFrame(stepFireworks);
+    }
+
+    window.addEventListener('resize', resizeFireworks);
+    window.addEventListener('load', resizeFireworks);
 
     paintSlides();
   </script>
