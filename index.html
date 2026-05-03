@@ -184,32 +184,48 @@
       transition: opacity 220ms ease;
     }
 
-    .hint .mouse {
-      width: 16px;
-      height: 24px;
-      border: 1.5px solid currentColor;
-      border-radius: 999px;
+    /* свайп-индикатор вместо мышки */
+
+    .hint .swipe {
       position: relative;
-      opacity: 0.75;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
     }
 
-    .hint .mouse::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 4px;
-      width: 3px;
-      height: 5px;
-      transform: translateX(-50%);
+    .swipe-line {
+      width: 22px;
+      height: 4px;
       border-radius: 999px;
       background: currentColor;
-      animation: wheel 1.7s ease-in-out infinite;
+      opacity: 0.4;
     }
 
-    @keyframes wheel {
-      0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
-      30% { opacity: 1; }
-      100% { opacity: 0; transform: translateX(-50%) translateY(0); }
+    .swipe-finger {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-left-color: transparent;
+      transform: rotate(45deg);
+      animation: swipe-down 1.4s ease-in-out infinite;
+      opacity: 0.9;
+    }
+
+    @keyframes swipe-down {
+      0% {
+        opacity: 0;
+        transform: translateY(-6px) rotate(45deg);
+      }
+      30% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(8px) rotate(45deg);
+      }
     }
 
     /* Кнопка Яндекс Карт — базовый стиль (десктоп) */
@@ -237,10 +253,10 @@
 
     .map-link:hover,
     .map-link:focus-visible {
-    /* без сдвига, только визуальный эффект */
-    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
-    background: var(--paper-strong);
-    outline: none;
+      /* без сдвига, только визуальный эффект */
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
+      background: var(--paper-strong);
+      outline: none;
     }
 
     .map-icon {
@@ -368,7 +384,8 @@
       .slide,
       .dot,
       .map-link,
-      .hint .mouse::after {
+      .hint .swipe,
+      .swipe-finger {
         transition: none !important;
         animation: none !important;
       }
@@ -430,7 +447,10 @@
       <button class="dot" type="button" aria-label="Перейти к слайду 6"></button>
     </div>
     <div class="hint" id="hint">
-      <span class="mouse" aria-hidden="true"></span>
+      <span class="swipe" aria-hidden="true">
+        <span class="swipe-finger"></span>
+        <span class="swipe-line"></span>
+      </span>
       <span>Листайте вниз</span>
     </div>
   </div>
