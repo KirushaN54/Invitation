@@ -2,91 +2,434 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Presentation Scroll</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Wedding Invitation</title>
   <style>
-    * {
-      box-sizing: border-box;
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #F2EFE2;
+      --olive: #8a9850;
+      --olive-dark: #6f7d3f;
+      --text: #161616;
+      --paper: rgba(242, 239, 226, 0.72);
+      --paper-strong: rgba(242, 239, 226, 0.9);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+      --radius: 24px;
+      --desktop-width: 920px;
+      --transition: 700ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
       height: 100%;
-      background: #F2EFE2;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Georgia, serif;
     }
 
-    .slider {
+    body {
+      position: relative;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .deck {
+      position: relative;
       width: 100%;
-      height: 100vh;
+      height: 100dvh;
+      background:
+        radial-gradient(circle at top, rgba(138, 152, 80, 0.08), transparent 35%),
+        linear-gradient(180deg, #f6f3e7 0%, #efe9d8 100%);
+      overflow: hidden;
     }
 
     .slide {
-      width: 100%;
-      height: 100vh;
+      position: absolute;
+      inset: 0;
       display: flex;
-      justify-content: center;
       align-items: center;
-      background: #F2EFE2;
+      justify-content: center;
+      padding: 0;
+      opacity: 0;
+      transform: translateY(8%) scale(0.985);
+      pointer-events: none;
+      transition:
+        opacity var(--transition),
+        transform var(--transition),
+        filter var(--transition);
+      filter: blur(10px);
+      z-index: 1;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+      pointer-events: auto;
+      z-index: 3;
+    }
+
+    .slide.prev {
+      opacity: 0;
+      transform: translateY(-7%) scale(0.985);
+      filter: blur(10px);
+      z-index: 2;
+    }
+
+    .slide.next {
+      opacity: 0;
+      transform: translateY(10%) scale(0.985);
+      filter: blur(10px);
+      z-index: 2;
+    }
+
+    .frame {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
     }
 
     .slide img {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       object-position: center center;
       display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .counter {
+      position: absolute;
+      top: max(14px, env(safe-area-inset-top));
+      right: 14px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(242, 239, 226, 0.82);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #4e5731;
+      pointer-events: auto;
+    }
+
+    .dots {
+      position: absolute;
+      top: 50%;
+      right: 14px;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(111, 125, 63, 0.55);
+      background: rgba(242, 239, 226, 0.55);
+      cursor: pointer;
+      transition: transform 220ms ease, background 220ms ease, border-color 220ms ease;
+    }
+
+    .dot.active {
+      background: var(--olive);
+      border-color: var(--olive);
+      transform: scale(1.2);
+    }
+
+    .hint {
+      position: absolute;
+      left: 50%;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(242, 239, 226, 0.82);
+      color: #4f5c2f;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      font-size: 13px;
+      letter-spacing: 0.03em;
+      pointer-events: auto;
+    }
+
+    .hint .mouse {
+      width: 16px;
+      height: 24px;
+      border: 1.5px solid currentColor;
+      border-radius: 999px;
+      position: relative;
+      opacity: 0.75;
+    }
+
+    .hint .mouse::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 4px;
+      width: 3px;
+      height: 5px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: currentColor;
+      animation: wheel 1.7s ease-in-out infinite;
+    }
+
+    @keyframes wheel {
+      0% { opacity: 0; transform: translateX(-50%) translateY(0); }
+      30% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+    }
+
+    .map-link {
+      position: absolute;
+      left: 50%;
+      bottom: calc(32px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 14px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #2f3818;
+      background: rgba(242, 239, 226, 0.92);
+      border: 1px solid rgba(138, 152, 80, 0.32);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+      backdrop-filter: blur(10px);
+      z-index: 8;
+      transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+    }
+
+    .map-link:hover,
+    .map-link:focus-visible {
+      transform: translateX(-50%) translateY(-2px);
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
+      background: var(--paper-strong);
+      outline: none;
+    }
+
+    .map-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #9daa61 0%, #7a8941 100%);
+      color: #fffef7;
+      flex: 0 0 auto;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+    }
+
+    .map-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+
+    .map-text strong {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .map-text span {
+      font-size: 11px;
+      color: rgba(47, 56, 24, 0.72);
+      margin-top: 3px;
+    }
+
+    @media (min-width: 900px) {
+      .slide {
+        padding: 28px 24px;
+      }
+
+      .frame {
+        width: min(var(--desktop-width), 100%);
+        height: calc(100dvh - 56px);
+        max-height: 100%;
+        border-radius: 30px;
+        box-shadow: var(--shadow);
+      }
+
+      .slide img {
+        object-fit: contain;
+        background: var(--bg);
+      }
+
+      .counter {
+        top: 24px;
+        right: 24px;
+      }
+
+      .dots {
+        right: 24px;
+      }
+
+      .hint {
+        bottom: 24px;
+      }
+    }
+
+    @media (max-width: 899px) {
+      .counter { font-size: 12px; }
+      .map-link { bottom: calc(22px + env(safe-area-inset-bottom)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide,
+      .dot,
+      .map-link,
+      .hint .mouse::after {
+        transition: none !important;
+        animation: none !important;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="slider">
-    <section class="slide"><img src="./photo1.jpeg" alt="Страница 1"></section>
-    <section class="slide"><img src="./photo2.jpeg" alt="Страница 2"></section>
-    <section class="slide"><img src="./photo3.jpeg" alt="Страница 3"></section>
-    <section class="slide"><img src="./photo4.jpeg" alt="Страница 4"></section>
-    <section class="slide"><img src="./photo5.jpeg" alt="Страница 5"></section>
-    <section class="slide"><img src="./photo6.jpeg" alt="Страница 6"></section>
-  </main>
+  <div class="deck" id="deck">
+    <section class="slide active" data-index="0">
+      <div class="frame"><img src="./photo1.jpeg" alt="Слайд 1 приглашения" /></div>
+    </section>
+    <section class="slide next" data-index="1">
+      <div class="frame"><img src="./photo2.jpeg" alt="Слайд 2 приглашения" /></div>
+    </section>
+    <section class="slide next" data-index="2">
+      <div class="frame">
+        <img src="./photo3.jpeg" alt="Слайд 3 приглашения с местом проведения" />
+        <a class="map-link" href="PASTE_YANDEX_MAPS_URL_HERE" target="_blank" rel="noopener noreferrer" aria-label="Открыть маршрут в Яндекс Картах">
+          <span class="map-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z" fill="currentColor"/>
+              <circle cx="12" cy="10" r="2.6" fill="#7a8941"/>
+            </svg>
+          </span>
+          <span class="map-text">
+            <strong>Открыть маршрут</strong>
+            <span>в Яндекс Картах</span>
+          </span>
+        </a>
+      </div>
+    </section>
+    <section class="slide next" data-index="3">
+      <div class="frame"><img src="./photo4.jpeg" alt="Слайд 4 приглашения" /></div>
+    </section>
+    <section class="slide next" data-index="4">
+      <div class="frame"><img src="./photo5.jpeg" alt="Слайд 5 приглашения" /></div>
+    </section>
+    <section class="slide next" data-index="5">
+      <div class="frame"><img src="./photo6.jpeg" alt="Слайд 6 приглашения" /></div>
+    </section>
+  </div>
+
+  <div class="hud" aria-hidden="false">
+    <div class="counter" id="counter">1 / 6</div>
+    <div class="dots" id="dots">
+      <button class="dot active" type="button" aria-label="Перейти к слайду 1"></button>
+      <button class="dot" type="button" aria-label="Перейти к слайду 2"></button>
+      <button class="dot" type="button" aria-label="Перейти к слайду 3"></button>
+      <button class="dot" type="button" aria-label="Перейти к слайду 4"></button>
+      <button class="dot" type="button" aria-label="Перейти к слайду 5"></button>
+      <button class="dot" type="button" aria-label="Перейти к слайду 6"></button>
+    </div>
+    <div class="hint" id="hint">
+      <span class="mouse" aria-hidden="true"></span>
+      <span>Листайте вниз</span>
+    </div>
+  </div>
 
   <script>
-    const slides = document.querySelectorAll('.slide');
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const dots = Array.from(document.querySelectorAll('.dot'));
+    const counter = document.getElementById('counter');
+    const hint = document.getElementById('hint');
     let current = 0;
     let locked = false;
     let touchStartY = 0;
+    let hintTimer;
+
+    function paintSlides() {
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active', 'prev', 'next');
+        if (index === current) slide.classList.add('active');
+        else if (index < current) slide.classList.add('prev');
+        else slide.classList.add('next');
+      });
+
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === current);
+      });
+
+      counter.textContent = `${current + 1} / ${slides.length}`;
+      if (current === slides.length - 1) {
+        hint.style.opacity = '0';
+      } else {
+        hint.style.opacity = '1';
+      }
+    }
+
+    function unlockLater() {
+      window.clearTimeout(hintTimer);
+      hintTimer = window.setTimeout(() => {
+        locked = false;
+      }, 760);
+    }
 
     function goToSlide(index) {
-      if (index < 0 || index >= slides.length) return;
+      if (locked || index < 0 || index >= slides.length || index === current) return;
       locked = true;
       current = index;
-      slides[current].scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        locked = false;
-      }, 900);
+      paintSlides();
+      unlockLater();
     }
 
     window.addEventListener('wheel', (e) => {
       if (locked) return;
-
-      if (e.deltaY > 30) {
-        goToSlide(current + 1);
-      } else if (e.deltaY < -30) {
-        goToSlide(current - 1);
-      }
+      if (Math.abs(e.deltaY) < 18) return;
+      if (e.deltaY > 0) goToSlide(current + 1);
+      else goToSlide(current - 1);
     }, { passive: true });
 
     window.addEventListener('keydown', (e) => {
       if (locked) return;
-
-      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+      if (['ArrowDown', 'PageDown', ' '].includes(e.key)) {
         e.preventDefault();
         goToSlide(current + 1);
       }
-
-      if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      if (['ArrowUp', 'PageUp'].includes(e.key)) {
         e.preventDefault();
         goToSlide(current - 1);
+      }
+      if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(0);
+      }
+      if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(slides.length - 1);
       }
     });
 
@@ -96,16 +439,18 @@
 
     window.addEventListener('touchend', (e) => {
       if (locked) return;
-
       const touchEndY = e.changedTouches[0].clientY;
       const diff = touchStartY - touchEndY;
-
-      if (diff > 50) {
-        goToSlide(current + 1);
-      } else if (diff < -50) {
-        goToSlide(current - 1);
-      }
+      if (Math.abs(diff) < 45) return;
+      if (diff > 0) goToSlide(current + 1);
+      else goToSlide(current - 1);
     }, { passive: true });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => goToSlide(index));
+    });
+
+    paintSlides();
   </script>
 </body>
 </html>
