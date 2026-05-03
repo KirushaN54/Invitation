@@ -374,7 +374,7 @@
            href="https://yandex.ru/maps/-/CPWAyO1~"
            target="_blank"
            rel="noopener noreferrer"
-           aria-label="Открыть маршрут в Яндекс Картах">
+           aria-label="Открыть в Яндекс Картах">
           <span class="map-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z" fill="currentColor"/>
@@ -393,6 +393,10 @@
     </section>
     <section class="slide next" data-index="4">
       <div class="frame"><img src="./photo5.jpeg" alt="Слайд 5 приглашения" /></div>
+    </section>
+    <section class="slide next" data-index="5">
+      <div class="frame"><img src="./photo6.jpeg" alt="Слайд 6 приглашения" /></div>
+    </section>
     </section>
     <section class="slide next" data-index="5">
       <div class="frame"><img src="./photo6.jpeg" alt="Слайд 6 приглашения" /></div>
@@ -441,7 +445,7 @@
 
       if (current === 0) {
         hint.style.opacity = '1';
-        startFireworks();
+        scheduleFireworks();
       } else {
         hint.style.opacity = '0';
       }
@@ -506,7 +510,7 @@
       dot.addEventListener('click', () => goToSlide(index));
     });
 
-    /* Простая анимация фейерверков на первом слайде */
+    /* ФЕЙЕРВЕРК: более плотный, розово‑фиолетовый, с задержкой */
 
     const fwCanvas = document.getElementById('fireworksCanvas');
     const fwCtx = fwCanvas.getContext('2d');
@@ -522,23 +526,27 @@
       fwCtx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     }
 
-    function createFireworkBurst() {
+    function createFireworkBurst(offsetX = 0) {
       const rect = fwCanvas.getBoundingClientRect();
-      const cx = rect.width / 2 + (Math.random() * 80 - 40);
-      const cy = rect.height / 3 + (Math.random() * 60 - 30);
-      const colors = ['#f5f0dd', '#ffe7a3', '#f7d188', '#ffffff', '#ffcfb3'];
+      const cx = rect.width / 2 + offsetX + (Math.random() * 60 - 30);
+      const cy = rect.height * (0.25 + Math.random() * 0.2);
+      const colors = [
+        '#ff9ad5', '#ff7ac4', '#f76df2',
+        '#e45dff', '#c257ff', '#a94bff',
+        '#ffd0f0', '#ffe1ff'
+      ];
 
-      const count = 40;
+      const count = 90; // больше частиц
       for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 * i) / count;
-        const speed = 1.3 + Math.random() * 1.4;
+        const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.3 - 0.15);
+        const speed = 1.6 + Math.random() * 1.9;
         fwParticles.push({
           x: cx,
           y: cy,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           life: 0,
-          maxLife: 40 + Math.random() * 18,
+          maxLife: 55 + Math.random() * 25,
           color: colors[Math.floor(Math.random() * colors.length)]
         });
       }
@@ -551,13 +559,16 @@
       fwParticles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.02;
+        p.vy += 0.03; // немного гравитации
         p.life++;
 
-        const alpha = Math.max(0, 1 - p.life / p.maxLife);
+        const fade = p.life / p.maxLife;
+        const alpha = Math.max(0, 1 - fade);
+        const size = 2.5 - fade * 1.2;
+
         fwCtx.globalAlpha = alpha;
         fwCtx.beginPath();
-        fwCtx.arc(p.x, p.y, 2.1, 0, Math.PI * 2);
+        fwCtx.arc(p.x, p.y, size, 0, Math.PI * 2);
         fwCtx.fillStyle = p.color;
         fwCtx.fill();
       });
@@ -565,19 +576,43 @@
       fwParticles = fwParticles.filter(p => p.life < p.maxLife);
       fwCtx.globalAlpha = 1;
 
+      if (fwActive || fwParticles.length > 0) {
+        requestAnimationFrame(stepFireworks);
+      } else {
+        fwCtx.clearRect(0, 0, fwCanvas.width, fwCanvas.height);
+      }
+    }
+
+    function runFireworksSequence() {
+      fwActive = true;
+      fwParticles = [];
+
+      resizeFireworks();
+
+      // серия залпов с небольшим смещением по горизонтали
+      createFireworkBurst(-60);
+      setTimeout(() => createFireworkBurst(40), 350);
+      setTimeout(() => createFireworkBurst(0), 700);
+      setTimeout(() => createFireworkBurst(-30), 1050);
+      setTimeout(() => createFireworkBurst(70), 1400);
+
+      // остановить через ~4 секунды после начала серии
+      setTimeout(() => { fwActive = false; }, 4200);
+
       requestAnimationFrame(stepFireworks);
     }
 
-    function startFireworks() {
+    function scheduleFireworks() {
       if (!fwCanvas || fwStartedOnce) return;
       fwStartedOnce = true;
-      fwActive = true;
-      resizeFireworks();
-      createFireworkBurst();
-      setTimeout(createFireworkBurst, 600);
-      setTimeout(createFireworkBurst, 1200);
-      setTimeout(() => { fwActive = false; }, 2600);
-      requestAnimationFrame(stepFireworks);
+
+      // задержка ~1.2 секунды после появления первого слайда
+      setTimeout(() => {
+        // вдруг пользователь уже ушёл со слайда 1
+        if (current === 0) {
+          runFireworksSequence();
+        }
+      }, 1200);
     }
 
     window.addEventListener('resize', resizeFireworks);
