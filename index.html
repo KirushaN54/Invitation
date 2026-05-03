@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Wedding Invitation</title>
+  <title>Пригласительный</title>
   <style>
     * { box-sizing: border-box; }
 
@@ -205,7 +205,7 @@
       100% { opacity: 0; transform: translateX(-50%) translateY(8px); }
     }
 
-    /* Кнопка Яндекс Карт */
+    /* Кнопка Яндекс Карт — базовый стиль (десктоп) */
 
     .map-link {
       position: absolute;
@@ -267,7 +267,7 @@
       margin-top: 3px;
     }
 
-    /* Мобильная рамка-карточка и уменьшенная плашка */
+    /* Мобильная рамка-карточка и иконка вместо плашки */
 
     @media (max-width: 768px) {
       .slide {
@@ -292,24 +292,27 @@
         object-fit: cover;
       }
 
+      /* На телефоне: круглая иконка, без текста, в правом нижнем углу */
       .map-link {
         bottom: calc(20px + env(safe-area-inset-bottom));
-        padding: 9px 12px;
-        min-height: 44px;
-        gap: 6px;
+        right: 20px;
+        left: auto;
+        transform: none;
+        padding: 0;
+        min-height: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        gap: 0;
       }
 
       .map-icon {
-        width: 26px;
-        height: 26px;
+        width: 40px;
+        height: 40px;
       }
 
-      .map-text strong {
-        font-size: 12px;
-      }
-
-      .map-text span {
-        font-size: 10px;
+      .map-text {
+        display: none;
       }
 
       .counter { font-size: 12px; }
@@ -441,7 +444,6 @@
       });
 
       counter.textContent = `${current + 1} / ${slides.length}`;
-
       hint.style.opacity = current === 0 ? '1' : '0';
     }
 
