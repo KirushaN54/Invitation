@@ -105,6 +105,8 @@
       -webkit-user-drag: none;
     }
 
+    /* HUD */
+
     .hud {
       position: fixed;
       inset: 0;
@@ -172,6 +174,7 @@
       font-size: 13px;
       letter-spacing: 0.03em;
       pointer-events: auto;
+      transition: opacity 220ms ease;
     }
 
     .hint .mouse {
@@ -202,11 +205,13 @@
       100% { opacity: 0; transform: translateX(-50%) translateY(8px); }
     }
 
+    /* Кнопка Яндекс Карт на слайде 3 */
+
     .map-link {
       position: absolute;
-      left: 50%;
-      bottom: calc(32px + env(safe-area-inset-bottom));
-      transform: translateX(-50%);
+      left: 6%;
+      top: 50%;
+      transform: translateY(-50%);
       display: inline-flex;
       align-items: center;
       gap: 10px;
@@ -225,7 +230,7 @@
 
     .map-link:hover,
     .map-link:focus-visible {
-      transform: translateX(-50%) translateY(-2px);
+      transform: translateY(-50%) translateX(0);
       box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
       background: var(--paper-strong);
       outline: none;
@@ -261,6 +266,31 @@
       margin-top: 3px;
     }
 
+    /* Мобильная адаптация: не резать картинку */
+
+    @media (max-width: 768px) {
+      .slide img {
+        width: 100%;
+        height: auto;
+        max-height: 100dvh;
+        object-fit: contain;
+      }
+
+      .frame {
+        height: auto;
+        max-height: 100dvh;
+      }
+
+      .map-link {
+        left: 4%;
+        padding: 12px 14px;
+      }
+
+      .counter { font-size: 12px; }
+    }
+
+    /* Десктопная “рамка” и ограничение ширины */
+
     @media (min-width: 900px) {
       .slide {
         padding: 28px 24px;
@@ -293,11 +323,6 @@
       }
     }
 
-    @media (max-width: 899px) {
-      .counter { font-size: 12px; }
-      .map-link { bottom: calc(22px + env(safe-area-inset-bottom)); }
-    }
-
     @media (prefers-reduced-motion: reduce) {
       .slide,
       .dot,
@@ -312,15 +337,19 @@
 <body>
   <div class="deck" id="deck">
     <section class="slide active" data-index="0">
-      <div class="frame"><img src="./photo1.jpeg" alt="Слайд 1 приглашения" /></div>
+      <div class="frame"><img src="./photo1.jpg" alt="Слайд 1 приглашения" /></div>
     </section>
     <section class="slide next" data-index="1">
-      <div class="frame"><img src="./photo2.jpeg" alt="Слайд 2 приглашения" /></div>
+      <div class="frame"><img src="./photo2.jpg" alt="Слайд 2 приглашения" /></div>
     </section>
     <section class="slide next" data-index="2">
       <div class="frame">
-        <img src="./photo3.jpeg" alt="Слайд 3 приглашения с местом проведения" />
-        <a class="map-link" href="https://yandex.ru/maps/-/CPWAyE94" target="_blank" rel="noopener noreferrer" aria-label="Открыть в Яндекс Картах">
+        <img src="./photo3.jpg" alt="Слайд 3 приглашения с местом проведения" />
+        <a class="map-link"
+           href="PASTE_YANDEX_MAPS_URL_HERE"
+           target="_blank"
+           rel="noopener noreferrer"
+           aria-label="Открыть маршрут в Яндекс Картах">
           <span class="map-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z" fill="currentColor"/>
@@ -335,13 +364,13 @@
       </div>
     </section>
     <section class="slide next" data-index="3">
-      <div class="frame"><img src="./photo4.jpeg" alt="Слайд 4 приглашения" /></div>
+      <div class="frame"><img src="./photo4.jpg" alt="Слайд 4 приглашения" /></div>
     </section>
     <section class="slide next" data-index="4">
-      <div class="frame"><img src="./photo5.jpeg" alt="Слайд 5 приглашения" /></div>
+      <div class="frame"><img src="./photo5.jpg" alt="Слайд 5 приглашения" /></div>
     </section>
     <section class="slide next" data-index="5">
-      <div class="frame"><img src="./photo6.jpeg" alt="Слайд 6 приглашения" /></div>
+      <div class="frame"><img src="./photo6.jpg" alt="Слайд 6 приглашения" /></div>
     </section>
   </div>
 
@@ -369,7 +398,7 @@
     let current = 0;
     let locked = false;
     let touchStartY = 0;
-    let hintTimer;
+    let unlockTimer;
 
     function paintSlides() {
       slides.forEach((slide, index) => {
@@ -384,16 +413,17 @@
       });
 
       counter.textContent = `${current + 1} / ${slides.length}`;
-      if (current === slides.length - 1) {
-        hint.style.opacity = '0';
-      } else {
+
+      if (current === 0) {
         hint.style.opacity = '1';
+      } else {
+        hint.style.opacity = '0';
       }
     }
 
     function unlockLater() {
-      window.clearTimeout(hintTimer);
-      hintTimer = window.setTimeout(() => {
+      window.clearTimeout(unlockTimer);
+      unlockTimer = window.setTimeout(() => {
         locked = false;
       }, 760);
     }
